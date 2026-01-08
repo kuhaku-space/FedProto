@@ -1,8 +1,9 @@
+from typing import Any
+
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-import torch
-from typing import Any
 
 __all__ = ["ResNet", "resnet18", "resnet34", "resnet50", "resnet101", "resnet152"]
 
@@ -31,7 +32,9 @@ def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample: nn.Module = None):
+    def __init__(
+        self, inplanes: int, planes: int, stride: int = 1, downsample: nn.Module = None
+    ):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -63,7 +66,9 @@ class BasicBlock(nn.Module):
 class Bottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample: nn.Module = None):
+    def __init__(
+        self, inplanes: int, planes: int, stride: int = 1, downsample: nn.Module = None
+    ):
         super(Bottleneck, self).__init__()
         self.conv1 = conv1x1(inplanes, planes)
         self.bn1 = nn.BatchNorm2d(planes)
@@ -99,7 +104,14 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, args: Any, block: Any, layers: list[int], num_classes: int = 1000, zero_init_residual: bool = False):
+    def __init__(
+        self,
+        args: Any,
+        block: Any,
+        layers: list[int],
+        num_classes: int = 1000,
+        zero_init_residual: bool = False,
+    ):
         super(ResNet, self).__init__()
         self.inplanes = 64
         self.conv1 = nn.Conv2d(
@@ -132,7 +144,9 @@ class ResNet(nn.Module):
                 elif isinstance(m, BasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
 
-    def _make_layer(self, block: Any, planes: int, blocks: int, stride: int = 1) -> nn.Sequential:
+    def _make_layer(
+        self, block: Any, planes: int, blocks: int, stride: int = 1
+    ) -> nn.Sequential:
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(

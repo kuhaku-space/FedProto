@@ -163,7 +163,9 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
     # return dict_users
 
 
-def mnist_noniid_unequal(dataset: datasets.MNIST, num_users: int) -> dict[int, np.ndarray]:
+def mnist_noniid_unequal(
+    dataset: datasets.MNIST, num_users: int
+) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -409,7 +411,13 @@ def femnist_noniid_unequal(dataset, num_users):
     return dict_users
 
 
-def cifar10_noniid(args: Any, dataset: datasets.CIFAR10, num_users: int, n_list: list[int], k_list: list[int]) -> tuple[dict[int, np.ndarray], list[list[int]], list[list[int]]]:
+def cifar10_noniid(
+    args: Any,
+    dataset: datasets.CIFAR10,
+    num_users: int,
+    n_list: list[int],
+    k_list: list[int],
+) -> tuple[dict[int, np.ndarray], list[list[int]], list[list[int]]]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -453,7 +461,14 @@ def cifar10_noniid(args: Any, dataset: datasets.CIFAR10, num_users: int, n_list:
     return dict_users, classes_list, classes_list_gt
 
 
-def cifar10_noniid_lt(args: Any, test_dataset: datasets.CIFAR10, num_users: int, n_list: list[int], k_list: list[int], classes_list: list[list[int]]) -> dict[int, np.ndarray]:
+def cifar10_noniid_lt(
+    args: Any,
+    test_dataset: datasets.CIFAR10,
+    num_users: int,
+    n_list: list[int],
+    k_list: list[int],
+    classes_list: list[list[int]],
+) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -518,7 +533,13 @@ def cifar_iid(dataset: datasets.CIFAR10, num_users: int) -> dict[int, set[int]]:
     return dict_users
 
 
-def cifar100_noniid(args: Any, dataset: datasets.CIFAR100, num_users: int, n_list: list[int], k_list: list[int]) -> tuple[dict[int, np.ndarray], list[list[int]]]:
+def cifar100_noniid(
+    args: Any,
+    dataset: datasets.CIFAR100,
+    num_users: int,
+    n_list: list[int],
+    k_list: list[int],
+) -> tuple[dict[int, np.ndarray], list[list[int]]]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -560,7 +581,9 @@ def cifar100_noniid(args: Any, dataset: datasets.CIFAR100, num_users: int, n_lis
     return dict_users, classes_list
 
 
-def cifar100_noniid_lt(test_dataset: datasets.CIFAR100, num_users: int, classes_list: list[list[int]]) -> dict[int, np.ndarray]:
+def cifar100_noniid_lt(
+    test_dataset: datasets.CIFAR100, num_users: int, classes_list: list[list[int]]
+) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:

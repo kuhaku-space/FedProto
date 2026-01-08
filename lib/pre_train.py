@@ -1,7 +1,6 @@
 import random
-from typing import Any
-from torch.utils.data import DataLoader
 import time
+from typing import Any
 
 import numpy as np
 import torch
@@ -10,6 +9,7 @@ import torchvision.models as models
 from models import Lenet
 from options import args_parser
 from torch import nn
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from utils import exp_details
 
@@ -38,7 +38,9 @@ trans_cifar10_val = transforms.Compose(
 )
 
 
-def train(args: Any, num_epoch: int, trainloader: DataLoader, testloader: DataLoader) -> None:
+def train(
+    args: Any, num_epoch: int, trainloader: DataLoader, testloader: DataLoader
+) -> None:
     model = Lenet(args=args)
     model.to(args.device)
     loss = nn.CrossEntropyLoss()

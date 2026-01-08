@@ -204,7 +204,9 @@ def average_weights(w: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]
     return w_avg
 
 
-def average_weights_sem(w: list[dict[str, torch.Tensor]], n_list: list[int]) -> dict[int, dict[str, torch.Tensor]]:
+def average_weights_sem(
+    w: list[dict[str, torch.Tensor]], n_list: list[int]
+) -> dict[int, dict[str, torch.Tensor]]:
     """
     Returns the average of the weights.
     """
@@ -286,7 +288,9 @@ def agg_func(protos: dict[Any, Any]) -> dict[Any, Any]:
     return protos
 
 
-def proto_aggregation(local_protos_list: dict[int, dict[Any, Any]]) -> dict[Any, list[torch.Tensor]]:
+def proto_aggregation(
+    local_protos_list: dict[int, dict[Any, Any]],
+) -> dict[Any, list[torch.Tensor]]:
     agg_protos_label = dict()
     for idx in local_protos_list:
         local_protos = local_protos_list[idx]

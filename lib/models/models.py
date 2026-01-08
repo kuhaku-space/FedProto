@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.6
 
+from typing import Any
+
+import torch
 import torch.nn.functional as F
 from torch import nn
-import torch
-from typing import Any
 
 
 class MLP(nn.Module):

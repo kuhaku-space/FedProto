@@ -1,11 +1,11 @@
 import os.path
 import warnings
+from typing import Any
 
 import numpy as np
 import torch
 import torch.utils.data as data
 from PIL import Image
-from typing import Any
 
 
 def load_image_path(key: str, out_field: Any, d: dict[str, Any]) -> Any:

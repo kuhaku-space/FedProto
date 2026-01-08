@@ -48,7 +48,9 @@ class LocalUpdate(object):
 
         return trainloader
 
-    def update_weights(self, idx: int, model: nn.Module, global_round: int) -> tuple[dict[str, torch.Tensor], float, float]:
+    def update_weights(
+        self, idx: int, model: nn.Module, global_round: int
+    ) -> tuple[dict[str, torch.Tensor], float, float]:
         # Set mode to train model
         model.train()
         epoch_loss = []
@@ -96,7 +98,13 @@ class LocalUpdate(object):
 
         return model.state_dict(), sum(epoch_loss) / len(epoch_loss), acc_val.item()
 
-    def update_weights_prox(self, idx: int, local_weights: dict[int, dict[str, torch.Tensor]], model: nn.Module, global_round: int) -> tuple[dict[str, torch.Tensor], float, float]:
+    def update_weights_prox(
+        self,
+        idx: int,
+        local_weights: dict[int, dict[str, torch.Tensor]],
+        model: nn.Module,
+        global_round: int,
+    ) -> tuple[dict[str, torch.Tensor], float, float]:
         # Set mode to train model
         model.train()
         epoch_loss = []
@@ -438,7 +446,12 @@ def test_inference_new_cifar(
     return loss, acc
 
 
-def test_inference_new_het(args: Any, local_model_list: list[nn.Module], test_dataset: Dataset, global_protos: dict[Any, Any] = {}) -> float:
+def test_inference_new_het(
+    args: Any,
+    local_model_list: list[nn.Module],
+    test_dataset: Dataset,
+    global_protos: dict[Any, Any] = {},
+) -> float:
     """Returns the test accuracy and loss."""
     loss, total, correct = 0.0, 0.0, 0.0
     loss_mse = nn.MSELoss()
@@ -485,7 +498,12 @@ def test_inference_new_het(args: Any, local_model_list: list[nn.Module], test_da
 
 
 def test_inference_new_het_lt(
-    args: Any, local_model_list: list[nn.Module], test_dataset: Dataset, classes_list: list[Any], user_groups_gt: dict[int, Any], global_protos: dict[Any, Any] = {}
+    args: Any,
+    local_model_list: list[nn.Module],
+    test_dataset: Dataset,
+    classes_list: list[Any],
+    user_groups_gt: dict[int, Any],
+    global_protos: dict[Any, Any] = {},
 ) -> tuple[list[float], list[float], list[float]]:
     """Returns the test accuracy and loss."""
     loss, total, correct = 0.0, 0.0, 0.0
@@ -569,7 +587,12 @@ def test_inference_new_het_lt(
     return acc_list_l, acc_list_g, loss_list
 
 
-def save_protos(args: Any, local_model_list: list[nn.Module], test_dataset: Dataset, user_groups_gt: dict[int, Any]) -> None:
+def save_protos(
+    args: Any,
+    local_model_list: list[nn.Module],
+    test_dataset: Dataset,
+    user_groups_gt: dict[int, Any],
+) -> None:
     """Returns the test accuracy and loss."""
     loss, total, correct = 0.0, 0.0, 0.0
 
@@ -632,7 +655,10 @@ def save_protos(args: Any, local_model_list: list[nn.Module], test_dataset: Data
 
 
 def test_inference_new_het_cifar(
-    args: Any, local_model_list: list[nn.Module], test_dataset: Dataset, global_protos: dict[Any, Any] = {}
+    args: Any,
+    local_model_list: list[nn.Module],
+    test_dataset: Dataset,
+    global_protos: dict[Any, Any] = {},
 ) -> float:
     """Returns the test accuracy and loss."""
     loss, total, correct = 0.0, 0.0, 0.0
