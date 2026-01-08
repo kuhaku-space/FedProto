@@ -3,47 +3,76 @@
 # Python version: 3.6
 
 import copy
-import torch
-from torchvision import datasets, transforms
-from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal, mnist_noniid_lt
-from sampling import femnist_iid, femnist_noniid, femnist_noniid_unequal, femnist_noniid_lt
-from sampling import cifar_iid, cifar100_noniid, cifar10_noniid, cifar100_noniid_lt, cifar10_noniid_lt
+from typing import Any
+
 import femnist
 import numpy as np
+import torch
+from sampling import (
+    cifar10_noniid,
+    cifar10_noniid_lt,
+    cifar100_noniid,
+    cifar100_noniid_lt,
+    cifar_iid,
+    femnist_iid,
+    femnist_noniid,
+    femnist_noniid_lt,
+    femnist_noniid_unequal,
+    mnist_iid,
+    mnist_noniid,
+    mnist_noniid_lt,
+    mnist_noniid_unequal,
+)
+from torchvision import datasets, transforms
 
-trans_cifar10_train = transforms.Compose([transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip(),
-                                          transforms.ToTensor(),
-                                          transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                               std=[0.229, 0.224, 0.225])])
-trans_cifar10_val = transforms.Compose([transforms.ToTensor(),
-                                        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                             std=[0.229, 0.224, 0.225])])
-trans_cifar100_train = transforms.Compose([transforms.RandomCrop(32, padding=4),
-                                          transforms.RandomHorizontalFlip(),
-                                          transforms.ToTensor(),
-                                          transforms.Normalize(mean=[0.507, 0.487, 0.441],
-                                                               std=[0.267, 0.256, 0.276])])
-trans_cifar100_val = transforms.Compose([transforms.ToTensor(),
-                                         transforms.Normalize(mean=[0.507, 0.487, 0.441],
-                                                              std=[0.267, 0.256, 0.276])])
+trans_cifar10_train = transforms.Compose(
+    [
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+trans_cifar10_val = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+trans_cifar100_train = transforms.Compose(
+    [
+        transforms.RandomCrop(32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    ]
+)
+trans_cifar100_val = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.507, 0.487, 0.441], std=[0.267, 0.256, 0.276]),
+    ]
+)
+
 
 def get_dataset(args, n_list, k_list):
-    """ Returns train and test datasets and a user group which is a dict where
+    """Returns train and test datasets and a user group which is a dict where
     the keys are the user index and the values are the corresponding data for
     each of those users.
     """
     data_dir = args.data_dir + args.dataset
-    if args.dataset == 'mnist':
-        apply_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
+    if args.dataset == "mnist":
+        apply_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        )
 
-        train_dataset = datasets.MNIST(data_dir, train=True, download=True,
-                                       transform=apply_transform)
+        train_dataset = datasets.MNIST(
+            data_dir, train=True, download=True, transform=apply_transform
+        )
 
-        test_dataset = datasets.MNIST(data_dir, train=False, download=True,
-                                      transform=apply_transform)
+        test_dataset = datasets.MNIST(
+            data_dir, train=False, download=True, transform=apply_transform
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -56,19 +85,25 @@ def get_dataset(args, n_list, k_list):
                 user_groups = mnist_noniid_unequal(args, train_dataset, args.num_users)
             else:
                 # Chose euqal splits for every user
-                user_groups, classes_list = mnist_noniid(args, train_dataset, args.num_users, n_list, k_list)
-                user_groups_lt = mnist_noniid_lt(args, test_dataset, args.num_users, n_list, k_list, classes_list)
+                user_groups, classes_list = mnist_noniid(
+                    args, train_dataset, args.num_users, n_list, k_list
+                )
+                user_groups_lt = mnist_noniid_lt(
+                    args, test_dataset, args.num_users, n_list, k_list, classes_list
+                )
                 classes_list_gt = classes_list
 
-    elif args.dataset == 'femnist':
-        apply_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
+    elif args.dataset == "femnist":
+        apply_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        )
 
-        train_dataset = femnist.FEMNIST(args, data_dir, train=True, download=True,
-                                        transform=apply_transform)
-        test_dataset = femnist.FEMNIST(args, data_dir, train=False, download=True,
-                                       transform=apply_transform)
+        train_dataset = femnist.FEMNIST(
+            args, data_dir, train=True, download=True, transform=apply_transform
+        )
+        test_dataset = femnist.FEMNIST(
+            args, data_dir, train=False, download=True, transform=apply_transform
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -80,16 +115,24 @@ def get_dataset(args, n_list, k_list):
             if args.unequal:
                 # Chose uneuqal splits for every user
                 # user_groups = mnist_noniid_unequal(train_dataset, args.num_users)
-                user_groups = femnist_noniid_unequal(args, train_dataset, args.num_users)
+                user_groups = femnist_noniid_unequal(
+                    args, train_dataset, args.num_users
+                )
                 # print("TBD")
             else:
                 # Chose euqal splits for every user
-                user_groups, classes_list, classes_list_gt = femnist_noniid(args, args.num_users, n_list, k_list)
+                user_groups, classes_list, classes_list_gt = femnist_noniid(
+                    args, args.num_users, n_list, k_list
+                )
                 user_groups_lt = femnist_noniid_lt(args, args.num_users, classes_list)
 
-    elif args.dataset == 'cifar10':
-        train_dataset = datasets.CIFAR10(data_dir, train=True, download=True, transform=trans_cifar10_train)
-        test_dataset = datasets.CIFAR10(data_dir, train=False, download=True, transform=trans_cifar10_val)
+    elif args.dataset == "cifar10":
+        train_dataset = datasets.CIFAR10(
+            data_dir, train=True, download=True, transform=trans_cifar10_train
+        )
+        test_dataset = datasets.CIFAR10(
+            data_dir, train=False, download=True, transform=trans_cifar10_val
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -102,12 +145,20 @@ def get_dataset(args, n_list, k_list):
                 raise NotImplementedError()
             else:
                 # Chose euqal splits for every user
-                user_groups, classes_list, classes_list_gt = cifar10_noniid(args, train_dataset, args.num_users, n_list, k_list)
-                user_groups_lt = cifar10_noniid_lt(args, test_dataset, args.num_users, n_list, k_list, classes_list)
+                user_groups, classes_list, classes_list_gt = cifar10_noniid(
+                    args, train_dataset, args.num_users, n_list, k_list
+                )
+                user_groups_lt = cifar10_noniid_lt(
+                    args, test_dataset, args.num_users, n_list, k_list, classes_list
+                )
 
-    elif args.dataset == 'cifar100':
-        train_dataset = datasets.CIFAR100(data_dir, train=True, download=True, transform=trans_cifar100_train)
-        test_dataset = datasets.CIFAR100(data_dir, train=False, download=True, transform=trans_cifar100_val)
+    elif args.dataset == "cifar100":
+        train_dataset = datasets.CIFAR100(
+            data_dir, train=True, download=True, transform=trans_cifar100_train
+        )
+        test_dataset = datasets.CIFAR100(
+            data_dir, train=False, download=True, transform=trans_cifar100_val
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -120,18 +171,30 @@ def get_dataset(args, n_list, k_list):
                 raise NotImplementedError()
             else:
                 # Chose euqal splits for every user
-                user_groups, classes_list = cifar100_noniid(args, train_dataset, args.num_users, n_list, k_list)
-                user_groups_lt = cifar100_noniid_lt(test_dataset, args.num_users, classes_list)
+                user_groups, classes_list = cifar100_noniid(
+                    args, train_dataset, args.num_users, n_list, k_list
+                )
+                user_groups_lt = cifar100_noniid_lt(
+                    test_dataset, args.num_users, classes_list
+                )
 
-    return train_dataset, test_dataset, user_groups, user_groups_lt, classes_list, classes_list_gt
+    return (
+        train_dataset,
+        test_dataset,
+        user_groups,
+        user_groups_lt,
+        classes_list,
+        classes_list_gt,
+    )
 
-def average_weights(w):
+
+def average_weights(w: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
     """
     Returns the average of the weights.
     """
     w_avg = copy.deepcopy(w)
     for key in w[0].keys():
-        if key[0:4] != '....':
+        if key[0:4] != "....":
             for i in range(1, len(w)):
                 w_avg[0][key] += w[i][key]
             # w_avg[0][key] = torch.true_divide(w_avg[0][key], len(w))
@@ -140,7 +203,8 @@ def average_weights(w):
                 w_avg[i][key] = w_avg[0][key]
     return w_avg
 
-def average_weights_sem(w, n_list):
+
+def average_weights_sem(w: list[dict[str, torch.Tensor]], n_list: list[int]) -> dict[int, dict[str, torch.Tensor]]:
     """
     Returns the average of the weights.
     """
@@ -151,7 +215,7 @@ def average_weights_sem(w, n_list):
 
     idx = 0
     for i in n_list:
-        if i< np.mean(n_list):
+        if i < np.mean(n_list):
             model_dict[0].append(idx)
         else:
             model_dict[1].append(idx)
@@ -172,13 +236,14 @@ def average_weights_sem(w, n_list):
 
     return ww
 
-def average_weights_per(w):
+
+def average_weights_per(w: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
     """
     Returns the average of the weights.
     """
     w_avg = copy.deepcopy(w)
     for key in w[0].keys():
-        if key[0:2] != 'fc':
+        if key[0:2] != "fc":
             for i in range(1, len(w)):
                 w_avg[0][key] += w[i][key]
             w_avg[0][key] = torch.true_divide(w_avg[0][key], len(w))
@@ -187,13 +252,14 @@ def average_weights_per(w):
                 w_avg[i][key] = w_avg[0][key]
     return w_avg
 
-def average_weights_het(w):
+
+def average_weights_het(w: list[dict[str, torch.Tensor]]) -> dict[str, torch.Tensor]:
     """
     Returns the average of the weights.
     """
     w_avg = copy.deepcopy(w)
     for key in w[0].keys():
-        if key[0:4] != 'fc2.':
+        if key[0:4] != "fc2.":
             for i in range(1, len(w)):
                 w_avg[0][key] += w[i][key]
             # w_avg[0][key] = torch.true_divide(w_avg[0][key], len(w))
@@ -202,7 +268,8 @@ def average_weights_het(w):
                 w_avg[i][key] = w_avg[0][key]
     return w_avg
 
-def agg_func(protos):
+
+def agg_func(protos: dict[Any, Any]) -> dict[Any, Any]:
     """
     Returns the average of the weights.
     """
@@ -218,7 +285,8 @@ def agg_func(protos):
 
     return protos
 
-def proto_aggregation(local_protos_list):
+
+def proto_aggregation(local_protos_list: dict[int, dict[Any, Any]]) -> dict[Any, list[torch.Tensor]]:
     agg_protos_label = dict()
     for idx in local_protos_list:
         local_protos = local_protos_list[idx]
@@ -240,19 +308,19 @@ def proto_aggregation(local_protos_list):
     return agg_protos_label
 
 
-def exp_details(args):
-    print('\nExperimental details:')
-    print(f'    Model     : {args.model}')
-    print(f'    Optimizer : {args.optimizer}')
-    print(f'    Learning  : {args.lr}')
-    print(f'    Global Rounds   : {args.rounds}\n')
+def exp_details(args: Any) -> None:
+    print("\nExperimental details:")
+    print(f"    Model     : {args.model}")
+    print(f"    Optimizer : {args.optimizer}")
+    print(f"    Learning  : {args.lr}")
+    print(f"    Global Rounds   : {args.rounds}\n")
 
-    print('    Federated parameters:')
+    print("    Federated parameters:")
     if args.iid:
-        print('    IID')
+        print("    IID")
     else:
-        print('    Non-IID')
-    print(f'    Fraction of users  : {args.frac}')
-    print(f'    Local Batch size   : {args.local_bs}')
-    print(f'    Local Epochs       : {args.train_ep}\n')
+        print("    Non-IID")
+    print(f"    Fraction of users  : {args.frac}")
+    print(f"    Local Batch size   : {args.local_bs}")
+    print(f"    Local Epochs       : {args.train_ep}\n")
     return

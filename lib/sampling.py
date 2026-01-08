@@ -3,29 +3,29 @@
 # Python version: 3.6
 
 
+import random
+from typing import Any
+
 import numpy as np
 from torchvision import datasets, transforms
-import random
-import torch
 
 
-def mnist_iid(dataset, num_users):
+def mnist_iid(dataset: datasets.MNIST, num_users: int) -> dict[int, set[int]]:
     """
     Sample I.I.D. client data from MNIST dataset
     :param dataset:
     :param num_users:
     :return: dict of image index
     """
-    num_items = int(len(dataset)/num_users)
+    num_items = int(len(dataset) / num_users)
     dict_users, all_idxs = {}, [i for i in range(len(dataset))]
     for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items,
-                                             replace=False))
+        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
     return dict_users
 
 
-# def mnist_noniid(dataset, num_users):
+# def mnist_noniid(dataset: datasets.MNIST, num_users: int) -> dict[int, np.ndarray]:
 #     """
 #     Sample non-I.I.D client data from MNIST dataset
 #     :param dataset:
@@ -53,6 +53,7 @@ def mnist_iid(dataset, num_users):
 #                 (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
 #     return dict_users
 
+
 def mnist_noniid(args, dataset, num_users, n_list, k_list):
     """
     Sample non-I.I.D client data from MNIST dataset
@@ -65,25 +66,25 @@ def mnist_noniid(args, dataset, num_users, n_list, k_list):
     num_shards, num_imgs = 10, 6000
     idx_shard = [i for i in range(num_shards)]
     dict_users = {}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = dataset.train_labels.numpy()
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
     label_begin = {}
-    cnt=0
-    for i in idxs_labels[1,:]:
+    cnt = 0
+    for i in idxs_labels[1, :]:
         if i not in label_begin:
-                label_begin[i] = cnt
-        cnt+=1
+            label_begin[i] = cnt
+        cnt += 1
 
     classes_list = []
     for i in range(num_users):
         n = n_list[i]
         k = k_list[i]
         k_len = args.train_shots_max
-        classes = random.sample(range(0,args.num_classes), n)
+        classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
         print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
         print("classes:", classes)
@@ -91,7 +92,7 @@ def mnist_noniid(args, dataset, num_users, n_list, k_list):
         for each_class in classes:
             # begin = i*10 + label_begin[each_class.item()]
             begin = i * k_len + label_begin[each_class.item()]
-            user_data = np.concatenate((user_data, idxs[begin : begin+k]),axis=0)
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
         classes_list.append(classes)
 
@@ -110,6 +111,7 @@ def mnist_noniid(args, dataset, num_users, n_list, k_list):
     #             (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
     # return dict_users
 
+
 def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list):
     """
     Sample non-I.I.D client data from MNIST dataset
@@ -122,29 +124,28 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
     num_shards, num_imgs = 10, 1000
     idx_shard = [i for i in range(num_shards)]
     dict_users = {}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = test_dataset.train_labels.numpy()
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
     label_begin = {}
-    cnt=0
-    for i in idxs_labels[1,:]:
+    cnt = 0
+    for i in idxs_labels[1, :]:
         if i not in label_begin:
-                label_begin[i] = cnt
-        cnt+=1
+            label_begin[i] = cnt
+        cnt += 1
 
     for i in range(num_users):
-        k = 40 # 每个类选多少张做测试
+        k = 40  # 每个类选多少张做测试
         classes = classes_list[i]
         print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
-            begin = i*40 + label_begin[each_class.item()]
-            user_data = np.concatenate((user_data, idxs[begin : begin+k]),axis=0)
+            begin = i * 40 + label_begin[each_class.item()]
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
-
 
     return dict_users
     #
@@ -161,7 +162,8 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
     #             (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
     # return dict_users
 
-def mnist_noniid_unequal(dataset, num_users):
+
+def mnist_noniid_unequal(dataset: datasets.MNIST, num_users: int) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -174,7 +176,7 @@ def mnist_noniid_unequal(dataset, num_users):
     num_shards, num_imgs = 1200, 50
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = dataset.train_labels.numpy()
 
     # sort labels
@@ -188,15 +190,14 @@ def mnist_noniid_unequal(dataset, num_users):
 
     # Divide the shards into random chunks for every client
     # s.t the sum of these chunks = num_shards
-    random_shard_size = np.random.randint(min_shard, max_shard+1,
-                                          size=num_users)
-    random_shard_size = np.around(random_shard_size /
-                                  sum(random_shard_size) * num_shards)
+    random_shard_size = np.random.randint(min_shard, max_shard + 1, size=num_users)
+    random_shard_size = np.around(
+        random_shard_size / sum(random_shard_size) * num_shards
+    )
     random_shard_size = random_shard_size.astype(int)
 
     # Assign the shards randomly to each client
     if sum(random_shard_size) > num_shards:
-
         for i in range(num_users):
             # First assign each client 1 shard to ensure every client has
             # atleast one shard of data
@@ -204,10 +205,11 @@ def mnist_noniid_unequal(dataset, num_users):
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
-        random_shard_size = random_shard_size-1
+        random_shard_size = random_shard_size - 1
 
         # Next, randomly assign the remaining shards
         for i in range(num_users):
@@ -216,36 +218,35 @@ def mnist_noniid_unequal(dataset, num_users):
             shard_size = random_shard_size[i]
             if shard_size > len(idx_shard):
                 shard_size = len(idx_shard)
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
     else:
-
         for i in range(num_users):
             shard_size = random_shard_size[i]
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
         if len(idx_shard) > 0:
             # Add the leftover shards to the client with minimum images:
             shard_size = len(idx_shard)
             # Add the remaining shard to the client with lowest data
             k = min(dict_users, key=lambda x: len(dict_users.get(x)))
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             for rand in rand_set:
                 dict_users[k] = np.concatenate(
-                    (dict_users[k], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[k], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
     return dict_users
 
@@ -257,13 +258,13 @@ def femnist_iid(dataset, num_users):
     :param num_users:
     :return: dict of image index
     """
-    num_items = int(len(dataset)/num_users)
+    num_items = int(len(dataset) / num_users)
     dict_users, all_idxs = {}, [i for i in range(len(dataset))]
     for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items,
-                                             replace=False))
+        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
     return dict_users
+
 
 def femnist_noniid(args, num_users, n_list, k_list):
     """
@@ -289,12 +290,13 @@ def femnist_noniid(args, num_users, n_list, k_list):
         user_data = np.array([])
         for class_idx in classes:
             begin = class_idx * k_len * num_users + i * k_len
-            user_data = np.concatenate((user_data, np.arange(begin, begin + k)),axis=0)
+            user_data = np.concatenate((user_data, np.arange(begin, begin + k)), axis=0)
         dict_users[i] = user_data
         classes_list.append(classes)
         classes_list_gt.append(classes)
 
     return dict_users, classes_list, classes_list_gt
+
 
 def femnist_noniid_lt(args, num_users, classes_list):
     """
@@ -332,7 +334,7 @@ def femnist_noniid_unequal(dataset, num_users):
     num_shards, num_imgs = 1200, 50
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = dataset.train_labels.numpy()
 
     # sort labels
@@ -346,15 +348,14 @@ def femnist_noniid_unequal(dataset, num_users):
 
     # Divide the shards into random chunks for every client
     # s.t the sum of these chunks = num_shards
-    random_shard_size = np.random.randint(min_shard, max_shard+1,
-                                          size=num_users)
-    random_shard_size = np.around(random_shard_size /
-                                  sum(random_shard_size) * num_shards)
+    random_shard_size = np.random.randint(min_shard, max_shard + 1, size=num_users)
+    random_shard_size = np.around(
+        random_shard_size / sum(random_shard_size) * num_shards
+    )
     random_shard_size = random_shard_size.astype(int)
 
     # Assign the shards randomly to each client
     if sum(random_shard_size) > num_shards:
-
         for i in range(num_users):
             # First assign each client 1 shard to ensure every client has
             # atleast one shard of data
@@ -362,10 +363,11 @@ def femnist_noniid_unequal(dataset, num_users):
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
-        random_shard_size = random_shard_size-1
+        random_shard_size = random_shard_size - 1
 
         # Next, randomly assign the remaining shards
         for i in range(num_users):
@@ -374,40 +376,40 @@ def femnist_noniid_unequal(dataset, num_users):
             shard_size = random_shard_size[i]
             if shard_size > len(idx_shard):
                 shard_size = len(idx_shard)
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
     else:
-
         for i in range(num_users):
             shard_size = random_shard_size[i]
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             idx_shard = list(set(idx_shard) - rand_set)
             for rand in rand_set:
                 dict_users[i] = np.concatenate(
-                    (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[i], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
         if len(idx_shard) > 0:
             # Add the leftover shards to the client with minimum images:
             shard_size = len(idx_shard)
             # Add the remaining shard to the client with lowest data
             k = min(dict_users, key=lambda x: len(dict_users.get(x)))
-            rand_set = set(np.random.choice(idx_shard, shard_size,
-                                            replace=False))
+            rand_set = set(np.random.choice(idx_shard, shard_size, replace=False))
             for rand in rand_set:
                 dict_users[k] = np.concatenate(
-                    (dict_users[k], idxs[rand*num_imgs:(rand+1)*num_imgs]),
-                    axis=0)
+                    (dict_users[k], idxs[rand * num_imgs : (rand + 1) * num_imgs]),
+                    axis=0,
+                )
 
     return dict_users
 
-def cifar10_noniid(args, dataset, num_users, n_list, k_list):
+
+def cifar10_noniid(args: Any, dataset: datasets.CIFAR10, num_users: int, n_list: list[int], k_list: list[int]) -> tuple[dict[int, np.ndarray], list[list[int]], list[list[int]]]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -443,14 +445,15 @@ def cifar10_noniid(args, dataset, num_users, n_list, k_list):
         user_data = np.array([])
         for each_class in classes:
             begin = i * k_len + label_begin[each_class.item()]
-            user_data = np.concatenate((user_data, idxs[begin: begin + k]), axis=0)
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
         classes_list.append(classes)
         classes_list_gt.append(classes)
 
     return dict_users, classes_list, classes_list_gt
 
-def cifar10_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list):
+
+def cifar10_noniid_lt(args: Any, test_dataset: datasets.CIFAR10, num_users: int, n_list: list[int], k_list: list[int], classes_list: list[list[int]]) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -461,18 +464,18 @@ def cifar10_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_lis
     # 60,000 training imgs -->  200 imgs/shard X 300 shards
     num_shards, num_imgs = 10, 1000
     dict_users = {}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = np.array(test_dataset.targets)
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
     label_begin = {}
-    cnt=0
-    for i in idxs_labels[1,:]:
+    cnt = 0
+    for i in idxs_labels[1, :]:
         if i not in label_begin:
-                label_begin[i] = cnt
-        cnt+=1
+            label_begin[i] = cnt
+        cnt += 1
 
     for i in range(num_users):
         k = args.test_shots
@@ -481,9 +484,8 @@ def cifar10_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_lis
         user_data = np.array([])
         for each_class in classes:
             begin = i * k + label_begin[each_class.item()]
-            user_data = np.concatenate((user_data, idxs[begin : begin+k]),axis=0)
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
-
 
     return dict_users
     #
@@ -501,25 +503,22 @@ def cifar10_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_lis
     # return dict_users
 
 
-
-def cifar_iid(dataset, num_users):
+def cifar_iid(dataset: datasets.CIFAR10, num_users: int) -> dict[int, set[int]]:
     """
     Sample I.I.D. client data from CIFAR10 dataset
     :param dataset:
     :param num_users:
     :return: dict of image index
     """
-    num_items = int(len(dataset)/num_users)
+    num_items = int(len(dataset) / num_users)
     dict_users, all_idxs = {}, [i for i in range(len(dataset))]
     for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items,
-                                             replace=False))
+        dict_users[i] = set(np.random.choice(all_idxs, num_items, replace=False))
         all_idxs = list(set(all_idxs) - dict_users[i])
     return dict_users
 
 
-
-def cifar100_noniid(args, dataset, num_users, n_list, k_list):
+def cifar100_noniid(args: Any, dataset: datasets.CIFAR100, num_users: int, n_list: list[int], k_list: list[int]) -> tuple[dict[int, np.ndarray], list[list[int]]]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -530,38 +529,38 @@ def cifar100_noniid(args, dataset, num_users, n_list, k_list):
     # 60,000 training imgs -->  200 imgs/shard X 300 shards
     num_shards, num_imgs = 100, 500
     dict_users = {}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = np.array(dataset.targets)
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
     label_begin = {}
-    cnt=0
-    for i in idxs_labels[1,:]:
+    cnt = 0
+    for i in idxs_labels[1, :]:
         if i not in label_begin:
-                label_begin[i] = cnt
-        cnt+=1
+            label_begin[i] = cnt
+        cnt += 1
 
     classes_list = []
     for i in range(num_users):
         n = n_list[i]
         k = k_list[i]
-        classes = random.sample(range(0,args.num_classes), n)
+        classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
         print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
         print("classes:", classes)
         user_data = np.array([])
         for each_class in classes:
-            begin = label_begin[each_class.item()] + i*5
-            user_data = np.concatenate((user_data, idxs[begin : begin+k]),axis=0)
+            begin = label_begin[each_class.item()] + i * 5
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
         classes_list.append(classes)
 
     return dict_users, classes_list
 
 
-def cifar100_noniid_lt(test_dataset, num_users, classes_list):
+def cifar100_noniid_lt(test_dataset: datasets.CIFAR100, num_users: int, classes_list: list[list[int]]) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -573,30 +572,29 @@ def cifar100_noniid_lt(test_dataset, num_users, classes_list):
     num_shards, num_imgs = 100, 100
     idx_shard = [i for i in range(num_shards)]
     dict_users = {}
-    idxs = np.arange(num_shards*num_imgs)
+    idxs = np.arange(num_shards * num_imgs)
     labels = np.array(test_dataset.targets)
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
     label_begin = {}
-    cnt=0
-    for i in idxs_labels[1,:]:
+    cnt = 0
+    for i in idxs_labels[1, :]:
         if i not in label_begin:
-                label_begin[i] = cnt
-        cnt+=1
+            label_begin[i] = cnt
+        cnt += 1
 
     for i in range(num_users):
-        k = 5 # 每个类选多少张做测试
+        k = 5  # 每个类选多少张做测试
         classes = classes_list[i]
         print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             # begin = i*5 + label_begin[each_class.item()]
-            begin = random.randint(0,90) + label_begin[each_class.item()]
-            user_data = np.concatenate((user_data, idxs[begin : begin+k]),axis=0)
+            begin = random.randint(0, 90) + label_begin[each_class.item()]
+            user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
-
 
     return dict_users
     #
@@ -614,13 +612,14 @@ def cifar100_noniid_lt(test_dataset, num_users, classes_list):
     # return dict_users
 
 
-
-if __name__ == '__main__':
-    dataset_train = datasets.MNIST('./data/mnist/', train=True, download=True,
-                                   transform=transforms.Compose([
-                                       transforms.ToTensor(),
-                                       transforms.Normalize((0.1307,),
-                                                            (0.3081,))
-                                   ]))
+if __name__ == "__main__":
+    dataset_train = datasets.MNIST(
+        "./data/mnist/",
+        train=True,
+        download=True,
+        transform=transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        ),
+    )
     num = 100
     d = mnist_noniid(dataset_train, num)
