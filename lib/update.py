@@ -23,7 +23,17 @@ class DatasetSplit(Dataset):
 
     def __getitem__(self, item: int) -> tuple[torch.Tensor, torch.Tensor]:
         image, label = self.dataset[self.idxs[item]]
-        return torch.tensor(image), torch.tensor(label)
+        if isinstance(image, torch.Tensor):
+            image = image.clone().detach()
+        else:
+            image = torch.tensor(image)
+
+        if isinstance(label, torch.Tensor):
+            label = label.clone().detach()
+        else:
+            label = torch.tensor(label)
+
+        return image, label
 
 
 class LocalUpdate(object):
@@ -80,7 +90,7 @@ class LocalUpdate(object):
                 _, y_hat = log_probs.max(1)
                 acc_val = torch.eq(y_hat, labels.squeeze()).float().mean()
 
-                if self.args.verbose and (batch_idx % 10 == 0):
+                if self.args.verbose > 1 and (batch_idx % 10 == 0):
                     print(
                         "| Global Round : {} | User: {} | Local Epoch : {} | [{}/{} ({:.0f}%)]\tLoss: {:.3f} | Acc: {:.3f}".format(
                             global_round,
@@ -143,7 +153,7 @@ class LocalUpdate(object):
                 _, y_hat = log_probs.max(1)
                 acc_val = torch.eq(y_hat, labels.squeeze()).float().mean()
 
-                if self.args.verbose and (batch_idx % 10 == 0):
+                if self.args.verbose > 1 and (batch_idx % 10 == 0):
                     print(
                         "| Global Round : {} | User: {} | Local Epoch : {} | [{}/{} ({:.0f}%)]\tLoss: {:.3f} | Acc: {:.3f}".format(
                             global_round,
@@ -213,7 +223,7 @@ class LocalUpdate(object):
                 _, y_hat = log_probs.max(1)
                 acc_val = torch.eq(y_hat, labels.squeeze()).float().mean()
 
-                if self.args.verbose and (batch_idx % 10 == 0):
+                if self.args.verbose > 1 and (batch_idx % 10 == 0):
                     print(
                         "| Global Round : {} | User: {} | Local Epoch : {} | [{}/{} ({:.0f}%)]\tLoss: {:.3f} | Acc: {:.3f}".format(
                             global_round,
@@ -539,7 +549,8 @@ def test_inference_new_het_lt(
             total += len(labels)
 
         acc = correct / total
-        print("| User: {} | Global Test Acc w/o protos: {:.3f}".format(idx, acc))
+        if args.verbose > 1:
+            print("| User: {} | Global Test Acc w/o protos: {:.3f}".format(idx, acc))
         acc_list_l.append(acc)
 
         # test (use global proto)
@@ -580,7 +591,10 @@ def test_inference_new_het_lt(
                     loss2 = loss2.detach().numpy()
 
             acc = correct / total
-            print("| User: {} | Global Test Acc with protos: {:.5f}".format(idx, acc))
+            if args.verbose > 1:
+                print(
+                    "| User: {} | Global Test Acc with protos: {:.5f}".format(idx, acc)
+                )
             acc_list_g.append(acc)
             loss_list.append(loss2)
 

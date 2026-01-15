@@ -86,8 +86,10 @@ def mnist_noniid(args, dataset, num_users, n_list, k_list):
         k_len = args.train_shots_max
         classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
-        print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
-        print("classes:", classes)
+        if args.verbose > 1:
+            print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
+        if args.verbose > 1:
+            print("classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             # begin = i*10 + label_begin[each_class.item()]
@@ -140,7 +142,8 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
     for i in range(num_users):
         k = 40  # 每个类选多少张做测试
         classes = classes_list[i]
-        print("local test classes:", classes)
+        if args.verbose > 1:
+            print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             begin = i * 40 + label_begin[each_class.item()]
@@ -286,9 +289,12 @@ def femnist_noniid(args, num_users, n_list, k_list):
         k_len = args.train_shots_max
         classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
-        print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
-        print("classes:", classes)
-        print("classes_gt:", classes)
+        if args.verbose > 1:
+            print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
+        if args.verbose > 1:
+            print("classes:", classes)
+        if args.verbose > 1:
+            print("classes_gt:", classes)
         user_data = np.array([])
         for class_idx in classes:
             begin = class_idx * k_len * num_users + i * k_len
@@ -448,8 +454,10 @@ def cifar10_noniid(
         k = k_list[i]
         classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
-        print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
-        print("classes:", classes)
+        if args.verbose > 1:
+            print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
+        if args.verbose > 1:
+            print("classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             begin = i * k_len + label_begin[each_class.item()]
@@ -495,7 +503,8 @@ def cifar10_noniid_lt(
     for i in range(num_users):
         k = args.test_shots
         classes = classes_list[i]
-        print("local test classes:", classes)
+        if args.verbose > 1:
+            print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             begin = i * k + label_begin[each_class.item()]
@@ -569,8 +578,10 @@ def cifar100_noniid(
         k = k_list[i]
         classes = random.sample(range(0, args.num_classes), n)
         classes = np.sort(classes)
-        print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
-        print("classes:", classes)
+        if args.verbose > 1:
+            print("user {:d}: {:d}-way {:d}-shot".format(i + 1, n, k))
+        if args.verbose > 1:
+            print("classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             begin = label_begin[each_class.item()] + i * 5
@@ -582,7 +593,10 @@ def cifar100_noniid(
 
 
 def cifar100_noniid_lt(
-    test_dataset: datasets.CIFAR100, num_users: int, classes_list: list[list[int]]
+    args: Any,
+    test_dataset: datasets.CIFAR100,
+    num_users: int,
+    classes_list: list[list[int]],
 ) -> dict[int, np.ndarray]:
     """
     Sample non-I.I.D client data from MNIST dataset
@@ -593,7 +607,7 @@ def cifar100_noniid_lt(
 
     # 60,000 training imgs -->  200 imgs/shard X 300 shards
     num_shards, num_imgs = 100, 100
-    idx_shard = [i for i in range(num_shards)]
+    # idx_shard = [i for i in range(num_shards)]
     dict_users = {}
     idxs = np.arange(num_shards * num_imgs)
     labels = np.array(test_dataset.targets)
@@ -611,7 +625,8 @@ def cifar100_noniid_lt(
     for i in range(num_users):
         k = 5  # 每个类选多少张做测试
         classes = classes_list[i]
-        print("local test classes:", classes)
+        if args.verbose > 1:
+            print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
             # begin = i*5 + label_begin[each_class.item()]

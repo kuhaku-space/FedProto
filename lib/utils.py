@@ -175,7 +175,7 @@ def get_dataset(args, n_list, k_list):
                     args, train_dataset, args.num_users, n_list, k_list
                 )
                 user_groups_lt = cifar100_noniid_lt(
-                    test_dataset, args.num_users, classes_list
+                    args, test_dataset, args.num_users, classes_list
                 )
 
     return (

@@ -68,9 +68,9 @@ def FedProto_taskheter(
 
     train_loss = []
 
-    for round in tqdm(range(args.rounds)):
+    for round in range(args.rounds):
         local_weights, local_losses, local_protos = [], [], {}
-        print(f"\n | Global Training Round : {round + 1} |\n")
+        print(f"| Global Training Round : {round + 1} |")
 
         proto_loss = 0
         for idx in idxs_users:
@@ -174,9 +174,9 @@ def FedProto_modelheter(
 
     train_loss = []
 
-    for round in tqdm(range(args.rounds)):
+    for round in range(args.rounds):
         local_weights, local_losses, local_protos = [], [], {}
-        print(f"\n | Global Training Round : {round + 1} |\n")
+        print(f"| Global Training Round : {round + 1} |")
 
         proto_loss = 0
         for idx in idxs_users:
@@ -222,7 +222,7 @@ def FedProto_modelheter(
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
 
-    acc_list_l, acc_list_g = test_inference_new_het_lt(
+    acc_list_l, acc_list_g, _ = test_inference_new_het_lt(
         args,
         local_model_list,
         test_dataset,
