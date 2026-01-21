@@ -16,18 +16,11 @@ import torch.utils.model_zoo as model_zoo
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-lib_dir = (Path(__file__).parent / ".." / "lib").resolve()
-if str(lib_dir) not in sys.path:
-    sys.path.insert(0, str(lib_dir))
-mod_dir = (Path(__file__).parent / ".." / "lib" / "models").resolve()
-if str(mod_dir) not in sys.path:
-    sys.path.insert(0, str(mod_dir))  # noqa: E402
-
-from models import CNNFemnist, CNNMnist
-from options import args_parser
-from resnet import resnet18
-from update import LocalUpdate, save_protos, test_inference_new_het_lt
-from utils import agg_func, exp_details, get_dataset, proto_aggregation
+from fedproto.models import CNNFemnist, CNNMnist
+from fedproto.models.resnet import resnet18
+from fedproto.options import args_parser
+from fedproto.update import LocalUpdate, save_protos, test_inference_new_het_lt
+from fedproto.utils import agg_func, exp_details, get_dataset, proto_aggregation
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",

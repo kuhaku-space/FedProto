@@ -6,12 +6,12 @@ import numpy as np
 import torch
 import torch.utils.model_zoo as model_zoo
 import torchvision.models as models
-from models import Lenet
+from fedproto.models import Lenet
 from options import args_parser
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
-from utils import exp_details
+from fedproto.utils import exp_details
 
 model_urls = {
     "resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",

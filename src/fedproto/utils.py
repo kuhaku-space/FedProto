@@ -5,10 +5,12 @@
 import copy
 from typing import Any
 
-import femnist
 import numpy as np
 import torch
-from sampling import (
+from torchvision import datasets, transforms
+
+import fedproto.femnist as femnist
+from fedproto.sampling import (
     cifar10_noniid,
     cifar10_noniid_lt,
     cifar100_noniid,
@@ -23,7 +25,6 @@ from sampling import (
     mnist_noniid_lt,
     mnist_noniid_unequal,
 )
-from torchvision import datasets, transforms
 
 trans_cifar10_train = transforms.Compose(
     [

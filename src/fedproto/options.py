@@ -57,7 +57,7 @@ def args_parser() -> Any:
 
     # other arguments
     parser.add_argument(
-        "--data_dir", type=str, default="../data/", help="directory of dataset"
+        "--data_dir", type=str, default="./data/", help="directory of dataset"
     )
     parser.add_argument(
         "--dataset",
