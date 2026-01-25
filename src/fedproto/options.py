@@ -104,6 +104,9 @@ def args_parser() -> Any:
     parser.add_argument(
         "--test_ep", type=int, default=10, help="num of test episodes for evaluation"
     )
+    parser.add_argument(
+        "--test_freq", type=int, default=1, help="frequency of test inference"
+    )
 
     # Local arguments
     parser.add_argument("--ways", type=int, default=3, help="num of classes")

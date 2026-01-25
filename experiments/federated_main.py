@@ -63,7 +63,6 @@ def FedProto_taskheter(
 
     for round in range(args.rounds):
         local_weights, local_losses, local_protos = [], [], {}
-        print(f"| Global Training Round : {round + 1} |")
 
         proto_loss = 0
         for idx in idxs_users:
@@ -107,6 +106,24 @@ def FedProto_taskheter(
 
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
+
+        if (round + 1) % args.test_freq == 0:
+            acc_list_l, acc_list_g, loss_list = test_inference_new_het_lt(
+                args,
+                local_model_list,
+                test_dataset,
+                classes_list,
+                user_groups_lt,
+                global_protos,
+            )
+            print(
+                "Round {:3d}, Global Acc: {:.5f}, Local Acc: {:.5f}, Proto Loss: {:.5f}".format(
+                    round + 1,
+                    np.mean(acc_list_g),
+                    np.mean(acc_list_l),
+                    np.mean(loss_list),
+                )
+            )
 
     acc_list_l, acc_list_g, loss_list = test_inference_new_het_lt(
         args,
@@ -169,7 +186,6 @@ def FedProto_modelheter(
 
     for round in range(args.rounds):
         local_weights, local_losses, local_protos = [], [], {}
-        print(f"| Global Training Round : {round + 1} |")
 
         proto_loss = 0
         for idx in idxs_users:
@@ -214,6 +230,24 @@ def FedProto_modelheter(
 
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
+
+        if (round + 1) % args.test_freq == 0:
+            acc_list_l, acc_list_g, loss_list = test_inference_new_het_lt(
+                args,
+                local_model_list,
+                test_dataset,
+                classes_list,
+                user_groups_lt,
+                global_protos,
+            )
+            print(
+                "Round {:3d}, Global Acc: {:.5f}, Local Acc: {:.5f}, Proto Loss: {:.5f}".format(
+                    round + 1,
+                    np.mean(acc_list_g),
+                    np.mean(acc_list_l),
+                    np.mean(loss_list),
+                )
+            )
 
     acc_list_l, acc_list_g, _ = test_inference_new_het_lt(
         args,
