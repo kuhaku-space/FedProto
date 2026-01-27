@@ -67,7 +67,7 @@ def mnist_noniid(args, dataset, num_users, n_list, k_list):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {}
     idxs = np.arange(num_shards * num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = dataset.targets.numpy()
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
@@ -127,7 +127,7 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
     idx_shard = [i for i in range(num_shards)]
     dict_users = {}
     idxs = np.arange(num_shards * num_imgs)
-    labels = test_dataset.train_labels.numpy()
+    labels = test_dataset.targets.numpy()
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
@@ -182,7 +182,7 @@ def mnist_noniid_unequal(
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards * num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = dataset.targets.numpy()
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -343,7 +343,7 @@ def femnist_noniid_unequal(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards * num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = dataset.targets.numpy()
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
