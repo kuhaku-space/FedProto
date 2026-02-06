@@ -140,13 +140,13 @@ def mnist_noniid_lt(args, test_dataset, num_users, n_list, k_list, classes_list)
         cnt += 1
 
     for i in range(num_users):
-        k = 40  # 每个类选多少张做测试
+        k = args.test_shots
         classes = classes_list[i]
         if args.verbose > 1:
             print("local test classes:", classes)
         user_data = np.array([])
         for each_class in classes:
-            begin = i * 40 + label_begin[each_class.item()]
+            begin = i * args.test_shots + label_begin[each_class.item()]
             user_data = np.concatenate((user_data, idxs[begin : begin + k]), axis=0)
         dict_users[i] = user_data
 
@@ -623,7 +623,7 @@ def cifar100_noniid_lt(
         cnt += 1
 
     for i in range(num_users):
-        k = 5  # 每个类选多少张做测试
+        k = args.test_shots
         classes = classes_list[i]
         if args.verbose > 1:
             print("local test classes:", classes)
