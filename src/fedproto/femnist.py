@@ -158,17 +158,30 @@ class FEMNIST(data.Dataset):
         data = []
         targets = torch.zeros([num_class * num_img])
         files = os.listdir(os.path.join(root, "data", "raw_data", "by_class"))
+        files.sort()
 
         for i in range(num_class):
+            class_dir = os.path.join(
+                root,
+                "data",
+                "raw_data",
+                "by_class",
+                files[i],
+                "train_" + files[i],
+            )
+            # Count actual images to avoid index out of range
+            # We assume filenames are formatted as train_XX_00000.png, so we can't just glob indiscriminately if there are other files
+            # But relying on the count of files in the dir is safer for modulo
+            # Let's count valid pngs
+            img_files = [f for f in os.listdir(class_dir) if f.endswith(".png")]
+            num_actual_imgs = len(img_files)
+
             for k in range(num_img):
+                # Use modulo to wrap around if requested k exceeds available images
+                idx_to_use = k % num_actual_imgs
                 img = os.path.join(
-                    root,
-                    "data",
-                    "raw_data",
-                    "by_class",
-                    files[i],
-                    "train_" + files[i],
-                    "train_" + files[i] + "_" + str("%05d" % k) + ".png",
+                    class_dir,
+                    "train_" + files[i] + "_" + str("%05d" % idx_to_use) + ".png",
                 )
                 data.append(img)
                 targets[i * num_img + k] = i
