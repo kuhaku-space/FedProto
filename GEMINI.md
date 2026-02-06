@@ -9,27 +9,29 @@
 ランタイム（Python等）および開発ツールのバージョン管理には `mise` を使用します。
 
 - **設定ファイル:** `mise.toml`
-- **ランタイム管理:** Python インタープリタ等の切り替えは `mise` を介して提案してください。
-- **タスク実行:** `mise run <task_name>` (例: `mise run train`) の形式を検討してください。
+- **ランタイム管理:** Python インタープリタ等の切り替えは必ず `mise` を介して提案してください。
+- **タスク実行:** `mise run <task_name>` (例: `mise run train`) の形式を優先的に検討してください。
 
 ## 2. Python パッケージ管理 (uv)
-パッケージ追加、仮想環境運用には `uv` を使用します。`pip` や `venv` を直接呼び出すことは厳禁です。
+パッケージ追加、仮想環境運用には `uv` を使用します。`pip` や `venv` の直接呼び出しは厳禁です。
 
 - **パッケージ追加:** `uv add <package>` (例: `uv add torch torchvision`)
+  - 開発用依存関係は `uv add --dev <package>` を使用してください。
 - **スクリプト実行:** 全ての Python 実行は `uv run <script_name>` で行ってください。
+- **環境同期:** `uv sync` を使用して、`uv.lock` と環境の一貫性を保ってください。
 - **管理ファイル:** `pyproject.toml` および `uv.lock` を正しく維持してください。
 
 ## 3. FedProto 再現実験に関する固有ルール
 - [cite_start]**プロトタイプ集約ロジック:** サーバーとクライアント間でモデルの重み（Gradients/Weights）ではなく、クラスごとの平均表現である「プロトタイプ」をやり取りするロジック [cite: 33, 34, 188] を優先して実装してください。
-- [cite_start]**損失関数の構成:** ローカルの分類誤差 $\mathcal{L}_S$ と、グローバルプロトタイプとの距離を測る正則化項 $\mathcal{L}_R$ の両方を考慮した損失関数（論文の式 7  参照）を提案してください。
+- [cite_start]**損失関数の構成:** ローカルの分類誤差 $\mathcal{L}_S$ と、グローバルプロトタイプとの距離を測る正則化項 $\mathcal{L}_R$ の両方を考慮した損失関数（論文の式 7 参照）を提案してください。
 - [cite_start]**異種環境の許容:** クライアントごとにモデルアーキテクチャが異なる状況（Model Heterogeneity） [cite: 36, 127] を想定した設計を行ってください。
 - **Antigravity:** プロジェクト固有のフレームワーク（Antigravity）に FedProto の各コンポーネントを適合させてください。
 
 ## 4. 禁止事項
-- **`pip install` の提案:** 代わりに `uv add` を使用。
-- **`venv` の手動作成:** `uv` の自動管理を利用。
-- [cite_start]**重み平均 (FedAvg) の強制:** FedProto の目的は重み平均を行わずに学習することであるため、安易に `FedAvg` を提案しない [cite: 125, 148]。
+- **`pip install` の提案:** 代わりに `uv add` を使用してください。
+- **`venv` の手動作成:** `uv` の自動管理を利用してください。
+- [cite_start]**重み平均 (FedAvg) の強制:** FedProto の目的は重み平均を行わずに学習することであるため、安易に `FedAvg` を提案しないでください [cite: 125, 148]。
 
 ## 5. 出力ルール
 - 回答は常に **日本語** で行ってください。
-- [cite_start]理論的な裏付けが必要な場合は、論文内の Assumption 1-4 [cite: 212, 218, 222, 230] [cite_start]や Convergence Analysis [cite: 209, 523] に基づいた説明を添えてください。
+- [cite_start]理論的な裏付けが必要な場合は、論文内の Assumption 1-4 [cite: 212, 218, 222, 230] や Convergence Analysis [cite: 209, 523] に基づいた説明を添えてください。
