@@ -4,7 +4,9 @@
 import argparse
 import itertools
 import re
+import statistics
 import subprocess
+from collections import defaultdict
 from typing import Dict, List
 
 
@@ -185,8 +187,47 @@ def main():
         res = run_experiment(params, rounds)
         results.append(res)
 
-    print("\n\nExperiment Summary:")
+    # Aggregate results over seeds
+    grouped_results = defaultdict(list)
+    for res in results:
+        key = (res["alg"], res["ways"], res["stdev"])
+        grouped_results[key].append(res)
+
+    aggregated_results = []
+    for (alg, ways, stdev), group in grouped_results.items():
+        agg = {"alg": alg, "ways": ways, "stdev": stdev}
+
+        for metric in [
+            "final_with_protos",
+            "max_with_protos",
+            "final_without_protos",
+            "max_without_protos",
+        ]:
+            values = [
+                r[metric]
+                for r in group
+                if metric in r and isinstance(r[metric], (int, float))
+            ]
+            if values:
+                mean_val = statistics.mean(values)
+                stdev_val = statistics.stdev(values) if len(values) > 1 else 0.0
+                agg[metric] = f"{mean_val:.4f} ± {stdev_val:.4f}"
+            else:
+                agg[metric] = "N/A"
+
+        statuses = [r.get("status", "Failed") for r in group]
+        if all(s == "Success" for s in statuses):
+            agg["status"] = "Success"
+        else:
+            agg["status"] = f"Success:{statuses.count('Success')}/{len(statuses)}"
+
+        aggregated_results.append(agg)
+
+    print("\n\nDetailed Results:")
     print_table(results)
+
+    print("\n\nAggregated Summary (Mean ± Stdev across seeds):")
+    print_table(aggregated_results)
 
 
 if __name__ == "__main__":
